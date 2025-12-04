@@ -50,17 +50,16 @@ CREATE TABLE "reservations" (
   "start_date" date NOT NULL,
   "end_date" date NOT NULL,
   "total_price" float NOT NULL,
-  "created_at" timestamp DEFAULT (now())
+  "created_at" timestamp DEFAULT (now()),
+  CHECK ("end_date" > "start_date")
 );
 
-ALTER TABLE "roles" ADD FOREIGN KEY ("id") REFERENCES "users" ("role_id");
+ALTER TABLE "users" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("id") REFERENCES "rentals" ("owner_id");
+ALTER TABLE "rentals" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
+ALTER TABLE "rentals" ADD FOREIGN KEY ("address_id") REFERENCES "addresses" ("id");
 
-ALTER TABLE "addresses" ADD FOREIGN KEY ("id") REFERENCES "rentals" ("address_id");
+ALTER TABLE "rental_images" ADD FOREIGN KEY ("rental_id") REFERENCES "rentals" ("id");
 
-ALTER TABLE "rentals" ADD FOREIGN KEY ("id") REFERENCES "rental_images" ("rental_id");
-
-ALTER TABLE "rentals" ADD FOREIGN KEY ("id") REFERENCES "reservations" ("rental_id");
-
-ALTER TABLE "users" ADD FOREIGN KEY ("id") REFERENCES "reservations" ("tenant_id");
+ALTER TABLE "reservations" ADD FOREIGN KEY ("rental_id") REFERENCES "rentals" ("id");
+ALTER TABLE "reservations" ADD FOREIGN KEY ("tenant_id") REFERENCES "users" ("id");
