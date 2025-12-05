@@ -1,0 +1,51 @@
+
+networks:
+  etnair_net:  
+
+volumes:
+  db_data:  
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: etnair_db
+    environment:
+      POSTGRES_USER: etnair_user
+      POSTGRES_PASSWORD: etnair_pass  
+      POSTGRES_DB: etnair_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # 
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - etnair_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etnair_user -d etnair_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    image: node:18-alpine
+    container_name: etnair_api
+    working_dir: /app
+    volumes:
+      - ./api:/app
+    command: sh -c "npm install && npm start"
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_USER: etnair_user
+      DB_PASSWORD: etnair_pass
+      DB_NAME: etnair_db
+      DB_PORT: 5432
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - etnair_net
+    restart: unless-stopped
