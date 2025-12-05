@@ -12,3 +12,5 @@ node_modules/
 
 # Database data (persistent volume)
 db/db_data/
+
+/generated/prisma
