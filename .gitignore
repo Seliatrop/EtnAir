@@ -9,3 +9,6 @@ node_modules/
 
 # Logs
 *.log
+
+# Database data (persistent volume)
+db/db_data/
