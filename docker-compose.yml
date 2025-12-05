@@ -6,7 +6,7 @@ services:
     container_name: etnair_db
     environment:
       POSTGRES_USER: etnair_user
-      POSTGRES_PASSWORD: etnair_password
+      POSTGRES_PASSWORD: etnair_pass
       POSTGRES_DB: etnair_db
     volumes:
       - ./db/db_data:/var/lib/postgresql/data
