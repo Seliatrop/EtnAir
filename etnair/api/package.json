@@ -1,12 +1,25 @@
 {
   "name": "etnair-api",
-  "version": "1.0. 0",
-  "description": "ETNAir API - STEP 01",
+  "version": "1.0.0",
+  "description": "API EtnAir avec Prisma",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "docker:migrate": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma migrate dev",
+    "docker:generate": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma generate",
+    "docker:studio": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma studio",
+    "docker:reset": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma migrate reset --force",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "prisma": "^6.19.0"
   }
 }
