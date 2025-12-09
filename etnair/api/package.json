@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "docker:migrate": "docker run --rm --network etnair_etnair_net -v \"${PWD}:/app\" -w /app node:18-alpine sh -c \"npm install && npx prisma migrate dev\"",
-    "docker:generate": "docker run --rm --network etnair_etnair_net -v \"${PWD}:/app\" -w /app node:18-alpine sh -c \"npm install && npx prisma generate\"",
-    "docker:studio": "docker run --rm --network etnair_etnair_net -v \"${PWD}:/app\" -w /app -p 5555:5555 node:18-alpine sh -c \"npm install && npx prisma studio\"",
-    "docker:reset": "docker run --rm --network etnair_etnair_net -v \"${PWD}:/app\" -w /app node:18-alpine sh -c \"npm install && npx prisma migrate reset --force\"",
+    "docker:migrate": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma migrate dev",
+    "docker:generate": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma generate",
+    "docker:studio": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma studio",
+    "docker:reset": "docker compose -f ../docker-compose.yml exec -w /app api npx prisma migrate reset --force",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio"
