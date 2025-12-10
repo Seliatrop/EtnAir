@@ -28,12 +28,13 @@ services:
       retries: 5
 
   api:
-    image: node:18-alpine
+    build:
+      context: ./api/
     container_name: etnair_api
     working_dir: /app
     volumes:
       - ./api:/app
-    command: sh -c "npm install && npm start"
+    command: sh -c "npm install && npm run dev"
     environment:
       PORT: 3000
       DB_HOST: db
@@ -42,7 +43,7 @@ services:
       DB_NAME: etnair_db
       DB_PORT: 5432
     ports:
-      - "3000:3000"
+      - "3000:2999"
     depends_on:
       db:
         condition: service_healthy
