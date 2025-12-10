@@ -138,23 +138,6 @@ CREATE TABLE "notifications" (
   "created_at" timestamp DEFAULT (now())
 );
 
-CREATE TABLE "support_tickets" (
-  "id" integer PRIMARY KEY,
-  "user_id" integer NOT NULL,
-  "subject" varchar(255) NOT NULL,
-  "message" text NOT NULL,
-  "status" varchar(50) DEFAULT 'open',
-  "created_at" timestamp DEFAULT (now())
-);
-
-CREATE TABLE "audit_logs" (
-  "id" integer PRIMARY KEY,
-  "user_id" integer,
-  "action" varchar(200),
-  "details" text,
-  "created_at" timestamp DEFAULT (now())
-);
-
 ALTER TABLE "users" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
 
 ALTER TABLE "user_verifications" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
@@ -194,7 +177,3 @@ ALTER TABLE "messages" ADD FOREIGN KEY ("receiver_id") REFERENCES "users" ("id")
 ALTER TABLE "messages" ADD FOREIGN KEY ("rental_id") REFERENCES "rentals" ("id");
 
 ALTER TABLE "notifications" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
-ALTER TABLE "support_tickets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
-ALTER TABLE "audit_logs" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
