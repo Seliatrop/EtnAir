@@ -1,7 +1,7 @@
 {
   "name": "etnair-api",
-  "version": "1.0. 0",
-  "description": "ETNAir API - STEP 01",
+  "version": "1.0.0",
+  "description": "API EtnAir avec Prisma",
   "main": "index.js",
  "scripts": {
     "start": "nodemon -L --watch . index.js",
