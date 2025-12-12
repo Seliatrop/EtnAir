@@ -45,7 +45,7 @@ services:
       DATABASE_URL: "postgresql://etnair_user:etnair_pass@db:5432/etnair_db?schema=public"
 
     ports:
-      - "3000:2999"
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
