@@ -11,6 +11,27 @@ const sel = 10;
 
 app.use(express.json());
 
+// middleware https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
+function verifToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token manquant ou invalide" });
+  }
+  
+  const token = authHeader.split(" ")[1];
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Token expiré" });
+    }
+    return res.status(403).json({ error: "Token invalide" });
+  }
+}
 // --- ROUTES ---
 
 // 1. Récupérer toutes les annonces
@@ -24,7 +45,7 @@ app.get("/annonces", async (req, res) => {
 });
 
 // 2. Créer une annonce
-app.post("/annonces", async (req, res) => {
+app.post("/annonces", verifToken, async (req, res) => {
   const { titre, description, prix, utilisateurId } = req.body;
   try {
     const result = await prisma.annonce.create({
@@ -58,13 +79,22 @@ app.post("/utilisateurs", async (req, res) => {
 
 app.post("/auth/register", async (req, res) => {
   const { email, nom, password } = req.body;
+  
+  if (!email || !nom || !password) {
+    return res.status(400).json({ error: "Email, nom et mot de passe requis" });
+  }
+  
   try {
     const hashPassword = await bcrypt.hash(password, sel);
     const user = await prisma.utilisateur.create({
       data: { email, nom, hashPassword },
     });
-    console.log(user);
-    res.status(201).json(user);
+    
+    const { hashPassword: _, ...userWithoutPassword } = user;
+    res.status(201).json({ 
+      message: "Utilisateur créé avec succès",
+      user: userWithoutPassword 
+    });
   } catch (error) {
     res.status(400).json({ error: "Email déjà pris ou données invalides" });
   }
@@ -72,18 +102,38 @@ app.post("/auth/register", async (req, res) => {
 
 app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email et mot de passe requis" });
+  }
+  
   try {
-    const egale = await bcrypt.compare(password, hashPassword);
     const user = await prisma.utilisateur.findUnique({
       where: { email },
     });
-    if (!user || !egale) {
+    
+    if (!user || !user.hashPassword) {
       return res.status(401).json({ error: "Identifiants invalides" });
     }
+    
+    const isPasswordValid = await bcrypt.compare(password, user.hashPassword);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Identifiants invalides" });
+    }
+    
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.json({ message: "Connexion réussie", user });
+    
+    // Ne pas renvoyer le mot de passe hashé dans la réponse
+    const { hashPassword: _, password: __, ...userWithoutPassword } = user;
+    
+    res.json({ 
+      message: "Connexion réussie", 
+      token,
+      user: userWithoutPassword 
+    });
   } catch (error) {
     res.status(500).json({ error: "Erreur serveur" });
   }

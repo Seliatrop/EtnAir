@@ -43,7 +43,7 @@ services:
       DB_NAME: etnair_db
       DB_PORT: 5432
     ports:
-      - "3000:2999"
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
