@@ -42,6 +42,8 @@ services:
       DB_PASSWORD: etnair_pass
       DB_NAME: etnair_db
       DB_PORT: 5432
+      DATABASE_URL: "postgresql://etnair_user:etnair_pass@db:5432/etnair_db?schema=public"
+
     ports:
       - "3000:3000"
     depends_on:
