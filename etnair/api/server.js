@@ -195,7 +195,29 @@ app.post("/utilisateurs", async (req, res) => {
     res.status(400).json({ error: "Email déjà pris ou données invalides" });
   }
 });
-
+// 3. Créer un utilisateur (Pour pouvoir créer des annonces ensuite)
+/**
+* @swagger
+* /auth/register:
+*   post:
+*     summary: Créer un nouvel utilisateur
+*     tags: [Utilisateurs]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/Utilisateur'
+*     responses:
+*       201:
+*         description: Utilisateur créé avec succès
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/Utilisateur'
+*       400:
+*         description: Email déjà pris ou données invalides
+*/
 app.post("/auth/register", async (req, res) => {
   const { email, nom, password } = req.body;
   
