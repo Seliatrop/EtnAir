@@ -41,19 +41,44 @@ npm run docker:studio
 npm run docker:reset
 ```
 
-### Commandes en local (Linux/Mac uniquement)
+### Commandes Docker directes (si npm scripts ne fonctionnent pas)
 
-Si vous êtes sur Linux/Mac et que Docker expose correctement le port 5432 :
+**⚠️ Important : Exécutez ces commandes depuis le dossier `api/`**
 
+**Sur PowerShell (Windows) :**
+```powershell
+# Pour les migrations
+docker run --rm --network etnair_etnair_net -v "${PWD}:/app" -w /app node:18-alpine sh -c "npx prisma migrate dev --name nom_migration"
+
+# Pour Prisma Studio
+docker run --rm --network etnair_etnair_net -v "${PWD}:/app" -w /app -p 5555:5555 node:18-alpine sh -c "npx prisma studio"
+
+# Pour générer le client
+docker run --rm --network etnair_etnair_net -v "${PWD}:/app" -w /app node:18-alpine sh -c "npx prisma generate"
+```
+
+**Sur CMD (Command Prompt Windows) :**
+```cmd
+# Pour les migrations
+docker run --rm --network etnair_etnair_net -v "%cd%:/app" -w /app node:18-alpine sh -c "npx prisma migrate dev --name nom_migration"
+
+# Pour Prisma Studio
+docker run --rm --network etnair_etnair_net -v "%cd%:/app" -w /app -p 5555:5555 node:18-alpine sh -c "npx prisma studio"
+
+# Pour générer le client
+docker run --rm --network etnair_etnair_net -v "%cd%:/app" -w /app node:18-alpine sh -c "npx prisma generate"
+```
+
+**Sur Linux/Mac (Bash/Zsh) :**
 ```bash
-# Créer une migration
-npm run prisma:migrate
+# Pour les migrations
+docker run --rm --network etnair_etnair_net -v "$(pwd):/app" -w /app node:18-alpine sh -c "npx prisma migrate dev --name nom_migration"
 
-# Générer le client
-npm run prisma:generate
+# Pour Prisma Studio
+docker run --rm --network etnair_etnair_net -v "$(pwd):/app" -w /app -p 5555:5555 node:18-alpine sh -c "npx prisma studio"
 
-# Ouvrir Prisma Studio
-npm run prisma:studio
+# Pour générer le client
+docker run --rm --network etnair_etnair_net -v "$(pwd):/app" -w /app node:18-alpine sh -c "npx prisma generate"
 ```
 
 ## Configuration
