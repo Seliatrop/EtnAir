@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,20 +7,182 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Utilisateur {
- id    Int   @id @default(autoincrement())
- email   String  @unique
- nom    String
- password String?
- hashPassword String?
- annonces Annonce[]
+model roles {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique @db.VarChar(50)
+  users users[]
 }
 
-model Annonce {
- id       Int   @id @default(autoincrement())
- titre    String
- description String
- prix     Float
- utilisateurId Int
- utilisateur Utilisateur @relation(fields: [utilisateurId], references: [id])
+model users {
+  id                Int                 @id @default(autoincrement())
+  firstName         String              @map("first_name") @db.VarChar(100)
+  lastName          String              @map("last_name") @db.VarChar(100)
+  email             String              @unique @db.VarChar(255)
+  phone             String              @unique @db.VarChar(30)
+  username          String              @unique @db.VarChar(30)
+  passwordHash      String              @map("password_hash") @db.VarChar(255)
+  profilePicture    String?             @map("profile_picture") @db.VarChar(500)
+  bio               String?
+  roleId            Int                 @map("role_id")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime?           @updatedAt @map("updated_at")
+  role              roles               @relation(fields: [roleId], references: [id])
+  userVerifications user_verifications?
+  sessions          sessions[]
+  loginAttempts     login_attempts[]
+  ownedRentals      rentals[]
+  reservations      reservations[]
+  reviews           reviews[]
+  favorites         favorites[]
+  sentMessages      messages[]          @relation("sender")
+  receivedMessages  messages[]          @relation("receiver")
+  notifications     notifications[]
+}
+
+model user_verifications {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique @map("user_id")
+  verifiedEmail Boolean  @default(false) @map("verified_email")
+  verifiedPhone Boolean  @default(false) @map("verified_phone")
+  verifiedId    Boolean  @default(false) @map("verified_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  user          users    @relation(fields: [userId], references: [id])
+}
+
+model sessions {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @db.VarChar(500)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      users    @relation(fields: [userId], references: [id])
+}
+
+model login_attempts {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  ipAddress String?  @map("ip_address") @db.VarChar(100)
+  success   Boolean?
+  createdAt DateTime @default(now()) @map("created_at")
+  user      users?   @relation(fields: [userId], references: [id])
+}
+
+model addresses {
+  id         Int       @id @default(autoincrement())
+  street     String    @db.VarChar(255)
+  city       String    @db.VarChar(100)
+  postalCode String    @map("postal_code") @db.VarChar(20)
+  country    String    @db.VarChar(100)
+  rentals    rentals[]
+}
+
+model rentals {
+  id            Int               @id @default(autoincrement())
+  ownerId       Int               @map("owner_id")
+  addressId     Int               @map("address_id")
+  title         String            @db.VarChar(200)
+  description   String
+  pricePerNight Decimal           @map("price_per_night") @db.Decimal(10, 2)
+  cleaningFee   Decimal?          @map("cleaning_fee") @db.Decimal(10, 2)
+  maxGuests     Int               @map("max_guests")
+  rules         String?
+  createdAt     DateTime          @default(now()) @map("created_at")
+  owner         users             @relation(fields: [ownerId], references: [id])
+  address       addresses         @relation(fields: [addressId], references: [id])
+  images        rental_images[]
+  calendar      rental_calendar[]
+  reservations  reservations[]
+  reviews       reviews[]
+  favorites     favorites[]
+  messages      messages[]
+}
+
+model rental_images {
+  id        Int      @id @default(autoincrement())
+  rentalId  Int      @map("rental_id")
+  imageUrl  String   @map("image_url") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  rental    rentals  @relation(fields: [rentalId], references: [id])
+}
+
+model rental_calendar {
+  id          Int      @id @default(autoincrement())
+  rentalId    Int      @map("rental_id")
+  date        DateTime @db.Date
+  isAvailable Boolean  @default(true) @map("is_available")
+  rental      rentals  @relation(fields: [rentalId], references: [id])
+}
+
+model reservations {
+  id         Int        @id @default(autoincrement())
+  rentalId   Int        @map("rental_id")
+  tenantId   Int        @map("tenant_id")
+  startDate  DateTime   @map("start_date") @db.Date
+  endDate    DateTime   @map("end_date") @db.Date
+  guests     Int        @default(1)
+  totalPrice Decimal    @map("total_price") @db.Decimal(10, 2)
+  status     String     @default("pending") @db.VarChar(50)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  rental     rentals    @relation(fields: [rentalId], references: [id])
+  tenant     users      @relation(fields: [tenantId], references: [id])
+  payments   payments[]
+  invoices   invoices[]
+}
+
+model payments {
+  id            Int          @id @default(autoincrement())
+  reservationId Int          @map("reservation_id")
+  amount        Decimal      @db.Decimal(10, 2)
+  method        String?      @db.VarChar(50)
+  status        String?      @db.VarChar(50)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  reservation   reservations @relation(fields: [reservationId], references: [id])
+}
+
+model invoices {
+  id            Int          @id @default(autoincrement())
+  reservationId Int          @map("reservation_id")
+  pdfUrl        String?      @map("pdf_url") @db.VarChar(500)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  reservation   reservations @relation(fields: [reservationId], references: [id])
+}
+
+model reviews {
+  id        Int      @id @default(autoincrement())
+  rentalId  Int      @map("rental_id")
+  userId    Int      @map("user_id")
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  rental    rentals  @relation(fields: [rentalId], references: [id])
+  user      users    @relation(fields: [userId], references: [id])
+}
+
+model favorites {
+  id       Int     @id @default(autoincrement())
+  userId   Int     @map("user_id")
+  rentalId Int     @map("rental_id")
+  user     users   @relation(fields: [userId], references: [id])
+  rental   rentals @relation(fields: [rentalId], references: [id])
+}
+
+model messages {
+  id         Int      @id @default(autoincrement())
+  senderId   Int      @map("sender_id")
+  receiverId Int      @map("receiver_id")
+  rentalId   Int?     @map("rental_id")
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  sender     users    @relation("sender", fields: [senderId], references: [id])
+  receiver   users    @relation("receiver", fields: [receiverId], references: [id])
+  rental     rentals? @relation(fields: [rentalId], references: [id])
+}
+
+model notifications {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  content   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      users    @relation(fields: [userId], references: [id])
 }
